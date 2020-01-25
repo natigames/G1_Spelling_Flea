@@ -1,0 +1,23 @@
+fileFormatVersion: 2
+guid: fd86ec5ea3a744bcfaef789cc76b3666
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: Fat Fantasy
+  fontNames:
+  - Fat Fantasy
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 1d4d90a99057944299dd1802a8465ed6, type: 3}
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
