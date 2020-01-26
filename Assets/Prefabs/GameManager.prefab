@@ -43,6 +43,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8f0b124c18ea409eaca469ef147bd20, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  level: 1
-  maxrows: 5
-  currentScore: 0
+  currentlevel: 0
+  currentWord: 0
+  score: 0
