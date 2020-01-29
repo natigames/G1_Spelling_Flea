@@ -4,11 +4,12 @@ using UnityEngine;
 using TMPro;
 using FrostweepGames.Plugins.GoogleCloud.TextToSpeech;
 using UnityEngine.Networking;
-
+using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
 
 public class Game : MonoBehaviour
 {
-    public Game instance;
+    public static Game instance;
 
     public TMP_InputField answer;
     private List<string> wrong = new List<string>();
@@ -19,7 +20,6 @@ public class Game : MonoBehaviour
     public GCTextToSpeech MC = new GCTextToSpeech();
     VoiceConfig myvoice = new VoiceConfig();
     public AudioSource audioSource;
-
 
     // Start is called before the first frame update
     void Start()
@@ -37,6 +37,7 @@ public class Game : MonoBehaviour
         currentWord = 0;
 
         StartCoroutine(API_getWords());
+        focusoninput();
     }
 
     // Update is called once per frame
@@ -55,6 +56,11 @@ public class Game : MonoBehaviour
         Debug.Log(thisWord); //replace this with actual text to voice
     }
 
+    public void focusoninput()
+    {
+        EventSystem.current.SetSelectedGameObject(answer.gameObject, null);
+        answer.OnPointerClick(new PointerEventData(EventSystem.current));
+    }
 
     public IEnumerator API_getWords()
     {
@@ -87,13 +93,16 @@ public class Game : MonoBehaviour
         if (answer.text.Length > 0)
         {
             // Repeat Full Word
-            speakWord(answer.text);
+            StartCoroutine(WaitforFeedback());
+            speakWord(wordlist[currentWord]);
+            UIController.instance.showFeedback(wordlist[currentWord]);
 
             // Grade Word
             Grade(answer.text, currentWord);
 
             // Clear text
             answer.text = "";
+            focusoninput();
 
             //go to next
             currentWord++;
@@ -103,14 +112,16 @@ public class Game : MonoBehaviour
                 currentlevel++;
                 StartCoroutine(API_getWords());
                 currentWord = 0;
+                UIController.instance.updateLevel(currentlevel);
             }
 
         }
 
     }
 
-    public void Replay()
+    public void Replay()  
     {
+        focusoninput();
         speakWord(wordlist[currentWord]);
     }
 
@@ -123,7 +134,7 @@ public class Game : MonoBehaviour
             if (e.type == EventType.KeyUp)
             {
                 Debug.Log(e.keyCode); // PLAY AUDIO FOR INDIVIDUAL LETTERS
-                if (e.keyCode != KeyCode.Return)
+                if (e.keyCode != KeyCode.Return && e.keyCode != KeyCode.Backspace && e.keyCode != KeyCode.Escape)
                 {
                     speakWord(e.keyCode.ToString());
                 }
@@ -136,19 +147,31 @@ public class Game : MonoBehaviour
     {
         if (wordlist[index] == answer)
         {
-            //right.Add(answer);
             Debug.Log("correct!"); // speak correct
+            right.Add(answer);
+            UIController.instance.updateScore(currentlevel);
+            //Player.instance.animCorrect(); 
         }
         else 
         {
-            GameManager.instance.endGame();
+            Debug.Log("error!"); // speak oops
+            wrong.Add(answer);
         }
+
+    }
+
+
+    private IEnumerator WaitforFeedback()
+    {
+        yield return new WaitForSeconds(2f);
+        UIController.instance.showFeedback("");
+        Replay();
     }
 
 
 
-    #region failed handlers
-    private void _gcTextToSpeech_SynthesizeFailedEvent(string error)
+        #region failed handlers
+        private void _gcTextToSpeech_SynthesizeFailedEvent(string error)
     {
         Debug.Log(error);
     }
