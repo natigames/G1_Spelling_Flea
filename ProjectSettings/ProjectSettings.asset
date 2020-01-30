@@ -707,10 +707,10 @@ PlayerSettings:
   facebookXfbml: 0
   facebookFrictionlessRequests: 1
   apiCompatibilityLevel: 6
-  cloudProjectId: 
+  cloudProjectId: 09b4dc4f-66f7-48c1-8d33-53881e8fa16f
   framebufferDepthMemorylessMode: 0
-  projectName: 
-  organizationId: 
+  projectName: SpellingFlea
+  organizationId: jcriveroll
   cloudEnabled: 0
   enableNativePlatformBackendsForNewInputSystem: 0
   disableOldInputManagerSupport: 0
