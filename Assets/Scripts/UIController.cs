@@ -29,9 +29,18 @@ public class UIController : MonoBehaviour
 
     public void updateScore(int points)
     {
-        int oldscore = int.Parse(score.text);
-        int newscore = oldscore + points;
-        score.text = newscore.ToString();
+        if (points == -1)
+        {
+            score.text = "0";
+
+        }
+        else
+        {
+            int oldscore = int.Parse(score.text);
+            int newscore = oldscore + points;
+            score.text = newscore.ToString();
+
+        }
     }
 
     public void updateLevel(int current)

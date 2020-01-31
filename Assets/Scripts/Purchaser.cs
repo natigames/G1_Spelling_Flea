@@ -9,6 +9,7 @@ using System.Collections;
 // Deriving the Purchaser class from IStoreListener enables it to receive messages from Unity Purchasing.
 public class Purchaser : MonoBehaviour, IStoreListener
     {
+
         private static IStoreController m_StoreController;          // The Unity Purchasing system.
         private static IExtensionProvider m_StoreExtensionProvider; // The store-specific Purchasing subsystems.
 
@@ -223,9 +224,7 @@ public class Purchaser : MonoBehaviour, IStoreListener
                 Debug.Log(string.Format("ProcessPurchase: PASS. Product: '{0}'", args.purchasedProduct.definition.id));
                 // TODO: The subscription item has been successfully purchased, grant this to the player.
                //JC:
-            PlayerPrefs.SetInt("premium", 1);
             StartCoroutine(setPremium());
-            Game.instance.Restart();
 
             }
             // Or ... an unknown product has been purchased by this user. Fill in additional products here....
@@ -255,6 +254,7 @@ public class Purchaser : MonoBehaviour, IStoreListener
             form.AddField("userid", PlayerPrefs.GetInt("userid"));
             using (var w = UnityWebRequest.Post("http://nati.games/apis/spellingflea.cfc", form))
             {
+                PlayerPrefs.SetInt("premium", 1);
                 yield return w.SendWebRequest();
             }
         }
