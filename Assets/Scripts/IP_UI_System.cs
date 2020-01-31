@@ -50,7 +50,7 @@ namespace IndiePixel.UI
 
             if (PlayerPrefs.GetInt("userid") != 0)
             {
-                SceneManager.LoadScene("game");
+                SceneManager.LoadScene("menu");
             }
 
             FadeIn();

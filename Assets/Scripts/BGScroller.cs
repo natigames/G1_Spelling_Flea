@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using DG.Tweening;
+//using DG.Tweening;
 
 public class BGScroller : MonoBehaviour
 {
@@ -16,10 +16,7 @@ public class BGScroller : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (PlayerPrefs.GetInt("userid") == 0)
-        {
-            transform.DOMoveX(1, 60);
-        }
+        //transform.DOMoveX(1, 60);
     }
 
     public void moveRight()

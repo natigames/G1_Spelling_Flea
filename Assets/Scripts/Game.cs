@@ -13,11 +13,8 @@ public class Game : MonoBehaviour
 {
     public static Game instance;
 
-    public GameObject menu;
     public GameObject game;
-    public GameObject shop;
     public GameObject help;
-
 
     public TMP_InputField answer;
     public string[] wordlist;
@@ -29,23 +26,25 @@ public class Game : MonoBehaviour
     public AudioClip openmenu;
 
     private help book;
+    private info info;
     public Text definition;
     public Text examples;
     public Text synonyms;
-    public string usedwords;
 
-    public Button easybtn;
-    public Button normalbtn;
-    public Button hardbtn;
+    public Text remain;
+    public Text score;
+    public Text pack;
+    public Text level;
+    public Text feedback;
 
-    // Start is called before the first frame update
-    public void init()
+    public List<string> right;
+    public List<string> wrong;
+
+
+    void Start()
     {
-        StartCoroutine(CheckIAP());
-        shop.SetActive(true);
-        help.SetActive(false);
-        game.SetActive(false);
-        menu.SetActive(true);
+        StartCoroutine(API_getWords());
+        StartCoroutine(PlayerInfo());
 
         MC = GCTextToSpeech.Instance;
         MC.SynthesizeSuccessEvent += _gcTextToSpeech_SynthesizeSuccessEvent;
@@ -55,18 +54,17 @@ public class Game : MonoBehaviour
         myvoice.gender = Enumerators.SsmlVoiceGender.FEMALE;
         myvoice.name = "en-GB-Wavenet-A";
 
-        UIController.instance.updateScore(-1);
-        PlayerPrefs.SetInt("currentword", 0);
+        //Init GUI
         answer.text = "";
-        usedwords = "";
         focusoninput();
-    }
-
-    void Start()
-    {
-        init();
-        StartCoroutine(API_getWords());
-        Menu();
+        score.text = "0 of 0";
+        PlayerPrefs.SetInt("currentword", 0);
+        switch (PlayerPrefs.GetString("level"))
+        {
+            case "E": level.text = "Level: Easy"; break;
+            case "M": level.text = "Level: Normal"; break;
+            case "H": level.text = "Level: Hard"; break;
+        }
     }
 
     // Catch user inputs;
@@ -78,6 +76,7 @@ public class Game : MonoBehaviour
         }
     }
 
+
     // this happens when enter word is submitted
     public void Submit()
     {
@@ -87,7 +86,6 @@ public class Game : MonoBehaviour
             // Repeat Full Word
             StartCoroutine(WaitforFeedback());
             speakWord();
-            UIController.instance.showFeedback(wordlist[PlayerPrefs.GetInt("currentword")]);
 
             // Grade Word
             Grade();
@@ -98,6 +96,11 @@ public class Game : MonoBehaviour
 
             //go to next
             nextword();
+
+            if (PlayerPrefs.GetInt("currentword") <= wordlist.Length)
+            {
+                StartCoroutine(WaitforFeedback());
+            }
         }
     }
 
@@ -111,30 +114,25 @@ public class Game : MonoBehaviour
             if (PlayerPrefs.GetInt("currentword") >= wordlist.Length)
             {
                 PlayerPrefs.SetInt("currentword", 0);
-                StartCoroutine(API_getWords());
             }
+            // PLAY ENDING SCENE...
+
         }
         else
         {
             if (PlayerPrefs.GetInt("currentword") >= 5)
             {
-                PlayerPrefs.SetInt("currentword", 0);
-                PlayerPrefs.SetString("words", "");
-                answer.text = "Subscribe/Reload to continue";
-                reloadwords();
+                SceneManager.LoadScene("menu");
             }
         }
     }
 
+
     //speak the word at current index (reloads if nulls)
     public void speakWord()
     {
-        reloadwords();
-        if (PlayerPrefs.GetInt("premium") == 1 || wordlist.Length > 1)
-        {
-            string thisWord = wordlist[PlayerPrefs.GetInt("currentword")];
-            MC.Synthesize(thisWord, myvoice, false, 1, 1, 16000);
-        }
+        string thisWord = wordlist[PlayerPrefs.GetInt("currentword")];
+        MC.Synthesize(thisWord, myvoice, false, 1, 1, 16000);
     }
 
     //speak word that is passed into
@@ -152,32 +150,16 @@ public class Game : MonoBehaviour
 
     public void Replay()  
     {
-        audioSource.Stop();
-       focusoninput();
-       menu.SetActive(false);
+        focusoninput();
         help.SetActive(false);
-       game.SetActive(true);
-       speakWord();
+        wordlist = PlayerPrefs.GetString("words").Split(","[0]);
+        speakWord();
     }
 
-    public void Restart()
-    {
-        StartCoroutine(CheckIAP());
-        init();
-        Replay();
-    }
 
     public void Menu()
     {
-        audioSource.PlayOneShot(openmenu);
-        menu.SetActive(true);
-        game.SetActive(false);
-        shop.SetActive(true);
-        if (PlayerPrefs.GetInt("premium") == 1)
-        {
-            shop.SetActive(false);
-        }
-        levelGUI();
+        SceneManager.LoadScene("menu");
     }
 
     public void Help()
@@ -185,32 +167,11 @@ public class Game : MonoBehaviour
         StartCoroutine(getHelp());
     }
 
-    public void closeIAP()
-    {
-        //reload words
-        reloadwords();
-        shop.SetActive(false);
-    }
 
     public void closeHelp()
     {
         help.SetActive(false);
-
-        //reload words
-        reloadwords();
-
-        game.SetActive(true);
-    }
-
-    // Gets Words from Playerprefs andupdates game.array
-    public void reloadwords()
-    {
-        string myString = PlayerPrefs.GetString("words");
-        wordlist = myString.Split(","[0]);
-        if (wordlist.Length <= 1)
-        {
-            answer.text = "Subscribe/Reload to continue";
-        }
+        wordlist = PlayerPrefs.GetString("words").Split(","[0]);
     }
 
     // Speaks typed letters
@@ -239,15 +200,18 @@ public class Game : MonoBehaviour
 
         if (wordlist[PlayerPrefs.GetInt("currentword")].ToLower() == answer.text.ToLower())
         {
-            int points = 1;
-            UIController.instance.updateScore(points);
             StartCoroutine(playCorrect());
+            right.Add(wordlist[PlayerPrefs.GetInt("currentword")]);
+            StartCoroutine(DisplayResult("Correct! " + wordlist[PlayerPrefs.GetInt("currentword")]));
         }
         else 
         {
             StartCoroutine(playWrong());
+            wrong.Add(wordlist[PlayerPrefs.GetInt("currentword")]);
+            StartCoroutine(DisplayResult("Wrong! " + wordlist[PlayerPrefs.GetInt("currentword")]));
         }
-
+        score.text = right.Count + " of " + (right.Count + wrong.Count);
+        remain.text = wordlist.Length - (right.Count + wrong.Count) + " to go";
     }
 
     // Play audio & video for correct word
@@ -273,9 +237,17 @@ public class Game : MonoBehaviour
     private IEnumerator WaitforFeedback()
     {
         yield return new WaitForSeconds(1.5f);
-        UIController.instance.showFeedback("");
-        Replay();
+        speakWord();
     }
+
+    // Speaks back Original Word as Feedback
+    private IEnumerator DisplayResult(string mytext)
+    {
+        feedback.text = mytext;
+        yield return new WaitForSeconds(1.5f);
+        feedback.text = "";
+    }
+
 
     // Fetch words and store them
     public IEnumerator API_getWords()
@@ -283,10 +255,8 @@ public class Game : MonoBehaviour
         wordlist = new string[0];
         WWWForm form = new WWWForm();
         form.AddField("method", "getWords");
-        form.AddField("maxrows", PlayerPrefs.GetInt("maxrows"));
         form.AddField("level", PlayerPrefs.GetString("level"));
         form.AddField("pack", PlayerPrefs.GetInt("pack"));
-        form.AddField("except", usedwords);
         using (var w = UnityWebRequest.Post("http://nati.games/apis/spellingflea.cfc", form))
         {
             yield return w.SendWebRequest();
@@ -296,9 +266,33 @@ public class Game : MonoBehaviour
             {
                 var myString = w.downloadHandler.text;
                 PlayerPrefs.SetString("words", myString);
-                usedwords = usedwords + "," + myString;
-                reloadwords();
+                wordlist = myString.Split(","[0]);
+                remain.text = wordlist.Length + " to go";
 
+                        speakWord();
+            }
+        }
+    }
+
+    // Fetch words and store them
+    public IEnumerator PlayerInfo()
+    {
+        wordlist = new string[0];
+        WWWForm form = new WWWForm();
+        form.AddField("method", "playerinfo");
+        form.AddField("userid", PlayerPrefs.GetInt("userid"));
+        form.AddField("pack", PlayerPrefs.GetInt("pack"));
+        form.AddField("level", PlayerPrefs.GetString("level"));
+        using (var w = UnityWebRequest.Post("http://nati.games/apis/spellingflea.cfc", form))
+        {
+            yield return w.SendWebRequest();
+            if (w.isNetworkError || w.isHttpError)
+            { print(w.error); }
+            else
+            {
+                var myString = w.downloadHandler.text;
+                info = JsonUtility.FromJson<info>(myString);
+                pack.text = info.packname;
             }
         }
     }
@@ -320,52 +314,10 @@ public class Game : MonoBehaviour
         }
     }
 
-    // Updates PlayerPrefs.Premium(int)
-    private IEnumerator CheckIAP()
-    {
-        WWWForm form = new WWWForm();
-        form.AddField("method", "checkIAP");
-        form.AddField("userid", PlayerPrefs.GetInt("userid"));
-        using (var w = UnityWebRequest.Post("http://nati.games/apis/spellingflea.cfc", form))
-        {
-            
-            yield return w.SendWebRequest();
-
-            if (w.isNetworkError || w.isHttpError)
-            { print(w.error); }
-            else
-            {
-                if (w.downloadHandler.text == "0")
-                {
-                    PlayerPrefs.SetInt("premium", 0);
-                    PlayerPrefs.SetInt("maxrows", 5);
-                    PlayerPrefs.SetInt("pack", 0);
-                    PlayerPrefs.SetInt("currentword", 0);
-                    PlayerPrefs.SetString("words", "");
-                    PlayerPrefs.SetString("level", "E");
-                    shop.SetActive(true);
-                }
-                else if (w.downloadHandler.text == "1")
-                {
-                    PlayerPrefs.SetInt("premium", 1);
-                    PlayerPrefs.SetString("words", "");
-                    PlayerPrefs.SetInt("currentword", 0);
-                    shop.SetActive(false);
-                }
-
-                if (wordlist.Length <= 1 && PlayerPrefs.GetInt("premium") == 1)
-                {
-                    StartCoroutine(API_getWords());
-                }
-
-            }
-        }
-    }
-
     // Gets info for word and populates
     public IEnumerator getHelp()
     {
-        reloadwords();
+        wordlist = PlayerPrefs.GetString("words").Split(","[0]);
         string myword = wordlist[PlayerPrefs.GetInt("currentword")];
 
         wordlist = new string[0];
@@ -386,8 +338,6 @@ public class Game : MonoBehaviour
                 examples.text = book.examples;
                 synonyms.text = book.synonyms;
                 help.SetActive(true);
-                game.SetActive(false);
-
             }
         }
     }
@@ -395,37 +345,14 @@ public class Game : MonoBehaviour
     // Dump Player preferences
     public void DumpPP()
     {
+        /*
         Debug.Log("maxrows: " + PlayerPrefs.GetInt("maxrows"));
         Debug.Log("currentword: " + PlayerPrefs.GetInt("currentword"));
         Debug.Log("premium: " + PlayerPrefs.GetInt("premium"));
         Debug.Log("pack: " + PlayerPrefs.GetInt("pack"));
         Debug.Log("userid: " + PlayerPrefs.GetInt("userid"));
         Debug.Log("level: " + PlayerPrefs.GetString("level"));
-        Debug.Log("words: " + PlayerPrefs.GetString("words"));
-    }
-
-    public void levelGUI()
-    {
-        switch (PlayerPrefs.GetString("level"))
-        {
-            case "E":
-                easybtn.gameObject.SetActive(false);
-                normalbtn.gameObject.SetActive(true);
-                hardbtn.gameObject.SetActive(true);
-                break;
-            case "M":
-                easybtn.gameObject.SetActive(true);
-                normalbtn.gameObject.SetActive(false);
-                hardbtn.gameObject.SetActive(true);
-                break;
-            case "H":
-                easybtn.gameObject.SetActive(true);
-                normalbtn.gameObject.SetActive(true);
-                hardbtn.gameObject.SetActive(false);
-                break;
-            default:
-                break;
-        }
+        */
     }
 
     #region failed handlers
@@ -442,8 +369,5 @@ public class Game : MonoBehaviour
         audioSource.Play();
     }
     #endregion sucess handlers
-
-
-
 
 }

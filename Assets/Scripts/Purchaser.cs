@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Purchasing;
 using UnityEngine.Networking;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 
 // Deriving the Purchaser class from IStoreListener enables it to receive messages from Unity Purchasing.
@@ -256,8 +257,9 @@ public class Purchaser : MonoBehaviour, IStoreListener
             {
                 PlayerPrefs.SetInt("premium", 1);
                 yield return w.SendWebRequest();
-            }
+                SceneManager.LoadScene("game");
         }
+    }
 
 
 }
