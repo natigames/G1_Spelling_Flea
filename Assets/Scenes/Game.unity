@@ -200,12 +200,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 65864732}
   m_CullTransparentMesh: 0
---- !u!82 &285410513 stripped
-AudioSource:
-  m_CorrespondingSourceObject: {fileID: 961758703292249525, guid: aaeb170de397e4b7b8d3836615018b3a,
-    type: 3}
-  m_PrefabInstance: {fileID: 961758703543710052}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &291035044
 GameObject:
   m_ObjectHideFlags: 0
@@ -2852,6 +2846,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 361025711, guid: aaeb170de397e4b7b8d3836615018b3a, type: 3}
+      propertyPath: m_audioClip
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 961758703292249513, guid: aaeb170de397e4b7b8d3836615018b3a,
         type: 3}
       propertyPath: m_Name
@@ -2930,7 +2928,7 @@ PrefabInstance:
         type: 3}
       propertyPath: audioSource
       value: 
-      objectReference: {fileID: 285410513}
+      objectReference: {fileID: 0}
     - target: {fileID: 3824185892668352648, guid: 40099fe18ce6640d39cb25be380fc068,
         type: 3}
       propertyPath: correctsound

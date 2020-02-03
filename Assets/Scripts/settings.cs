@@ -23,11 +23,12 @@ public class settings : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        PlayerPrefs.SetString("level", "E");
-        PlayerPrefs.SetInt("pack", 0);
-
         wordlist = new string[0];
         AllWords.text = "";
+        PlayerPrefs.SetString("packname", "Columbia 1st Grade - English");
+        PlayerPrefs.SetInt("pack",1);
+        PlayerPrefs.SetString("voice", "English");
+        PlayerPrefs.SetString("level", "E");
 
         switch (PlayerPrefs.GetString("Level"))
         {
@@ -54,11 +55,13 @@ public class settings : MonoBehaviour
             }
         }
 
-        for (var i = 0; i < LangDropDown.options.Count; i++)
+
+        //get pack name
+        for (var i = 0; i < PackDropDown.options.Count; i++)
         {
-            if (LangDropDown.options[i].text == PlayerPrefs.GetString("lang"))
+            if (PackDropDown.options[i].text == PlayerPrefs.GetString("packname"))
             {
-                LangDropDown.value = i;
+                PackDropDown.value = i;
             }
         }
 
@@ -70,23 +73,12 @@ public class settings : MonoBehaviour
             Listen2Select();
         });
         VoiceDropDown.onValueChanged.AddListener(delegate {
-            setVoice();
+            PlayerPrefs.SetString("voice", VoiceDropDown.options[VoiceDropDown.value].text);
+            Debug.Log("Voice: " + PlayerPrefs.GetString("voice"));
         });
-        LangDropDown.onValueChanged.AddListener(delegate {
-            setVoice();
-        });
-
 
         StartCoroutine(getPacks());
-
-    }
-
-    public void setVoice()
-    {
-        PlayerPrefs.SetString("voice", VoiceDropDown.options[VoiceDropDown.value].text);
-        Debug.Log("Voice: " + PlayerPrefs.GetString("voice"));
-        PlayerPrefs.SetString("lang", LangDropDown.options[LangDropDown.value].text);
-        Debug.Log("Lang: " + PlayerPrefs.GetString("lang"));
+        StartCoroutine(getWords());
 
     }
 
@@ -98,6 +90,7 @@ public class settings : MonoBehaviour
             {
                 PlayerPrefs.SetInt("pack", vehicle.Make);
                 SelectedPackName.text = vehicle.Model;
+                PlayerPrefs.SetString("packname", vehicle.Model);
             }
         }
 

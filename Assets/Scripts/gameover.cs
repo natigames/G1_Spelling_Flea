@@ -11,7 +11,7 @@ public class gameover : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        score.text = PlayerPrefs.GetInt("getInt").ToString();        
+        score.text = PlayerPrefs.GetFloat("score").ToString();        
     }
 
     public void quit()
