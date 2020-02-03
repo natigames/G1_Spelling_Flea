@@ -20,10 +20,9 @@ public class Game : MonoBehaviour
     public string[] wordlist;
     public GCTextToSpeech MC;
     VoiceConfig myvoice = new VoiceConfig();
-    public AudioSource audioSource;
     public AudioClip correctsound;
     public AudioClip wrongsound;
-    public AudioClip openmenu;
+    public AudioSource audioSource;
 
     private help book;
     private info info;
@@ -40,19 +39,42 @@ public class Game : MonoBehaviour
     public List<string> right;
     public List<string> wrong;
 
-
     void Start()
     {
         StartCoroutine(API_getWords());
         StartCoroutine(PlayerInfo());
 
-        MC = GCTextToSpeech.Instance;
+        //MC = GCTextToSpeech.Instance;
         MC.SynthesizeSuccessEvent += _gcTextToSpeech_SynthesizeSuccessEvent;
         MC.SynthesizeFailedEvent += _gcTextToSpeech_SynthesizeFailedEvent;
 
-        myvoice.languageCode = "en_AU";
+
         myvoice.gender = Enumerators.SsmlVoiceGender.FEMALE;
+        myvoice.languageCode = "en_AU";
         myvoice.name = "en-GB-Wavenet-A";
+
+        /*
+        Debug.Log("voice:" + PlayerPrefs.GetString("voice"));
+        Debug.Log("lang:" + PlayerPrefs.GetString("lang"));
+
+        myvoice.languageCode = PlayerPrefs.GetString("lang");
+        if (PlayerPrefs.GetString("voice") == "FEMALE")
+            { 
+            myvoice.gender = Enumerators.SsmlVoiceGender.FEMALE;
+            //myvoice.name = "en-GB-Wavenet-A";
+            myvoice.name = myvoice.languageCode + "-Wavenet-A";
+            }
+        else if (PlayerPrefs.GetString("voice") == "MALE")
+        {   
+            myvoice.gender = Enumerators.SsmlVoiceGender.MALE;
+            myvoice.name = myvoice.languageCode + "-Wavenet-B";
+        }
+        else
+        {
+            myvoice.gender = Enumerators.SsmlVoiceGender.NEUTRAL;
+            myvoice.name = myvoice.languageCode + "-Wavenet-C";
+        }
+        */
 
         //Init GUI
         answer.text = "";
@@ -277,7 +299,7 @@ public class Game : MonoBehaviour
     // Fetch words and store them
     public IEnumerator PlayerInfo()
     {
-        wordlist = new string[0];
+        //wordlist = new string[0];
         WWWForm form = new WWWForm();
         form.AddField("method", "playerinfo");
         form.AddField("userid", PlayerPrefs.GetInt("userid"));

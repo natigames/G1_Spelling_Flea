@@ -657,9 +657,9 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: e3265ab4bf004d28a9537516768c1c75, type: 3}
-    m_FontSize: 100
+    m_FontSize: 80
     m_FontStyle: 0
-    m_BestFit: 0
+    m_BestFit: 1
     m_MinSize: 0
     m_MaxSize: 100
     m_Alignment: 4
@@ -1077,6 +1077,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 883590593}
   m_CullTransparentMesh: 0
+--- !u!114 &916503916 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 114599950165526744, guid: dadfefdf830a0494fa60be45f5125fac,
+    type: 3}
+  m_PrefabInstance: {fileID: 5737231880164877901}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bccc475a1afcd324e94932b3c223a6db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1000674310
 GameObject:
   m_ObjectHideFlags: 0
@@ -3024,6 +3036,11 @@ PrefabInstance:
       propertyPath: remain
       value: 
       objectReference: {fileID: 1953142073}
+    - target: {fileID: 3824185892668352648, guid: 40099fe18ce6640d39cb25be380fc068,
+        type: 3}
+      propertyPath: MC
+      value: 
+      objectReference: {fileID: 916503916}
     - target: {fileID: 3824185892668352649, guid: 40099fe18ce6640d39cb25be380fc068,
         type: 3}
       propertyPath: m_LocalPosition.x

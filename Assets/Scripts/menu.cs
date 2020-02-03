@@ -15,9 +15,15 @@ public class menu : MonoBehaviour
 
     public GameObject shop;
 
-
     private void Start()
     {
+        if (PlayerPrefs.GetString("lang") == "0" || PlayerPrefs.GetString("lang") == "")
+        {
+            PlayerPrefs.SetString("lang","en_AU");
+            PlayerPrefs.SetString("voice","FEMALE");
+        }
+            
+
         StartCoroutine(CheckIAP());
         if (PlayerPrefs.GetInt("premium") == 1)
         {
@@ -31,6 +37,17 @@ public class menu : MonoBehaviour
         //vars iniciales playerprfs
         PlayerPrefs.SetInt("currentword",0);
         PlayerPrefs.SetString("words", "");
+        SceneManager.LoadScene("game");
+    }
+
+    public void Play()
+    {
+        SceneManager.LoadScene("game");
+    }
+
+    public void Settings()
+    {
+        SceneManager.LoadScene("settings");
     }
 
     public void Logout()
@@ -39,6 +56,10 @@ public class menu : MonoBehaviour
         SceneManager.LoadScene("UI");
     }
 
+    public void quit()
+    {
+        Application.Quit();
+    }
 
     public void levelGUI()
     {
@@ -73,8 +94,14 @@ public class menu : MonoBehaviour
         else
         {
             PlayerPrefs.SetString("level", newlevel);
+            StartCoroutine(PlayerInfo());
             levelGUI();
         }
+    }
+
+    public void Leaders()
+    {
+        SceneManager.LoadScene("leaders");
     }
 
 
@@ -120,6 +147,22 @@ public class menu : MonoBehaviour
                 }
 
             }
+        }
+    }
+
+
+    // Fetch words and store them
+    public IEnumerator PlayerInfo()
+    {
+        //wordlist = new string[0];
+        WWWForm form = new WWWForm();
+        form.AddField("method", "playerinfo");
+        form.AddField("userid", PlayerPrefs.GetInt("userid"));
+        form.AddField("pack", PlayerPrefs.GetInt("pack"));
+        form.AddField("level", PlayerPrefs.GetString("level"));
+        using (var w = UnityWebRequest.Post("http://nati.games/apis/spellingflea.cfc", form))
+        {
+            yield return w.SendWebRequest();
         }
     }
 
