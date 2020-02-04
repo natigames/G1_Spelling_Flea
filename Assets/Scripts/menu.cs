@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Networking;
 using UnityEngine.UI;
+using UnityEngine.Purchasing;
 
 public class menu : MonoBehaviour
 {
@@ -17,10 +18,10 @@ public class menu : MonoBehaviour
 
     private void Start()
     {
-        if (PlayerPrefs.GetString("lang") == "0" || PlayerPrefs.GetString("lang") == "")
+
+        if (PlayerPrefs.GetString("voice") == "0" || PlayerPrefs.GetString("voice") == "")
         {
-            PlayerPrefs.SetString("lang","en_AU");
-            PlayerPrefs.SetString("voice","FEMALE");
+            PlayerPrefs.SetString("voice","English");
         }
             
 
@@ -37,6 +38,7 @@ public class menu : MonoBehaviour
         //vars iniciales playerprfs
         PlayerPrefs.SetInt("currentword",0);
         PlayerPrefs.SetString("words", "");
+        PlayerPrefs.SetFloat("score", 0f);
         SceneManager.LoadScene("game");
     }
 

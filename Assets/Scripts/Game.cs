@@ -1,13 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
-using FrostweepGames.Plugins.GoogleCloud.TextToSpeech;
+//using TMPro;
+//using FrostweepGames.Plugins.GoogleCloud.TextToSpeech;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UnityEngine.Purchasing;
+//using UnityEngine.Purchasing;
 
 namespace FrostweepGames.Plugins.GoogleCloud.TextToSpeech
 {
@@ -18,7 +18,7 @@ namespace FrostweepGames.Plugins.GoogleCloud.TextToSpeech
         public GameObject game;
         public GameObject help;
 
-        public TMP_InputField answer;
+        public InputField answer;
         public string[] wordlist;
         private GCTextToSpeech MC;
         VoiceConfig myvoice = new VoiceConfig();
@@ -42,10 +42,23 @@ namespace FrostweepGames.Plugins.GoogleCloud.TextToSpeech
 
         public float myscore = 0;
 
+        private TouchScreenKeyboard mobileKeys;
+
+            /*
+        public void OnInputEvent()
+        {
+            mobileKeys = TouchScreenKeyboard.Open("", TouchScreenKeyboardType.Default, false);
+        }
+        */
+
+        [System.Obsolete]
         void Start()
         {
             StartCoroutine(API_getWords());
             StartCoroutine(PlayerInfo());
+
+            mobileKeys = TouchScreenKeyboard.Open("", TouchScreenKeyboardType.Default, false);
+
 
             MC = GCTextToSpeech.Instance;
             MC.SynthesizeSuccessEvent += _gcTextToSpeech_SynthesizeSuccessEvent;
@@ -56,6 +69,21 @@ namespace FrostweepGames.Plugins.GoogleCloud.TextToSpeech
             myvoice.languageCode = "en_AU";
             myvoice.name = "en-AU-Wavenet-A";
             */
+
+            answer.onEndEdit.AddListener(val =>
+            {
+                if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter) || mobileKeys.status == TouchScreenKeyboard.Status.Done)
+                    Submit();
+            });
+
+            answer.onValueChange.AddListener(val =>
+            {
+                if (answer.text.Length > 0)
+                {
+                    var myletter = answer.text.Substring(answer.text.Length - 1, 1);
+                    speakLetter(myletter);
+                }
+            });
 
             switch (PlayerPrefs.GetString("voice"))
             {
@@ -89,10 +117,9 @@ namespace FrostweepGames.Plugins.GoogleCloud.TextToSpeech
 
             //Init GUI
             answer.text = "";
+            score.text = right.Count + " of " + (right.Count + wrong.Count);
             focusoninput();
-            score.text = "0 of 0";
-            PlayerPrefs.SetInt("currentword", 0);
-            PlayerPrefs.SetFloat("score", 0f);
+
             switch (PlayerPrefs.GetString("level"))
             {
                 case "E": level.text = "Level: Easy"; break;
@@ -104,12 +131,11 @@ namespace FrostweepGames.Plugins.GoogleCloud.TextToSpeech
         // Catch user inputs;
         void Update()
         {
-            if (Input.GetKeyDown(KeyCode.Return))
+            if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
             {
                 Submit();
             }
         }
-
 
         // this happens when enter word is submitted
         public void Submit()
@@ -119,7 +145,7 @@ namespace FrostweepGames.Plugins.GoogleCloud.TextToSpeech
             {
                 // Repeat Full Word
                 StartCoroutine(WaitforFeedback());
-                speakWord();
+                //speakWord();  
 
                 // Grade Word
                 Grade();
@@ -171,7 +197,14 @@ namespace FrostweepGames.Plugins.GoogleCloud.TextToSpeech
         //speak word that is passed into
         public void speakLetter(string thisletter)
         {
-            MC.Synthesize(thisletter, myvoice, false, 1, 1, 16000);
+            if (mobileKeys.status == TouchScreenKeyboard.Status.Done)
+            {
+                Submit();
+            }
+            else
+            {
+                MC.Synthesize(thisletter, myvoice, false, 1, 1, 16000);
+            }
         }
 
         //set focus on input box
@@ -197,7 +230,10 @@ namespace FrostweepGames.Plugins.GoogleCloud.TextToSpeech
 
         public void Help()
         {
-            StartCoroutine(getHelp());
+            if (PlayerPrefs.GetString("voice") == "English")
+            {
+                StartCoroutine(getHelp());
+            }
         }
 
 
@@ -215,12 +251,11 @@ namespace FrostweepGames.Plugins.GoogleCloud.TextToSpeech
             {
                 if (e.type == EventType.KeyUp)
                 {
-                    if (e.keyCode != KeyCode.Return && e.keyCode != KeyCode.Backspace && e.keyCode != KeyCode.Escape)
+                    if (e.keyCode != KeyCode.Return)
                     {
-                        if (wordlist.Length > 1)
-                        {
-                            speakLetter(e.keyCode.ToString());
-                        }
+                        /*
+                        speakLetter(e.keyCode.ToString());
+                        */
                     }
                 }
             }
@@ -235,13 +270,13 @@ namespace FrostweepGames.Plugins.GoogleCloud.TextToSpeech
             {
                 StartCoroutine(playCorrect());
                 right.Add(wordlist[PlayerPrefs.GetInt("currentword")]);
-                StartCoroutine(DisplayResult("Correct! " + wordlist[PlayerPrefs.GetInt("currentword")]));
+                StartCoroutine(DisplayResult("Yes! " + wordlist[PlayerPrefs.GetInt("currentword")]));
             }
             else
             {
                 StartCoroutine(playWrong());
                 wrong.Add(wordlist[PlayerPrefs.GetInt("currentword")]);
-                StartCoroutine(DisplayResult("Wrong! " + wordlist[PlayerPrefs.GetInt("currentword")]));
+                StartCoroutine(DisplayResult("No! " + wordlist[PlayerPrefs.GetInt("currentword")]));
             }
             score.text = right.Count + " of " + (right.Count + wrong.Count);
             remain.text = wordlist.Length - (right.Count + wrong.Count) + " to go";
@@ -252,7 +287,6 @@ namespace FrostweepGames.Plugins.GoogleCloud.TextToSpeech
         // Play audio & video for correct word
         private IEnumerator playCorrect()
         {
-            BGScroller.instance.moveRight();
             Player.instance.doAnim("correct");
             NewAudio.Instance.PlayOneShot(correctsound);
             yield return new WaitForSeconds(2f);

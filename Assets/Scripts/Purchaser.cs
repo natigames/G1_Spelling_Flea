@@ -29,12 +29,12 @@ public class Purchaser : MonoBehaviour, IStoreListener
         public static string kProductIDSubscription = "subscription";
 
         // Apple App Store-specific product identifier for the subscription product.
-        private static string kProductNameAppleSubscription = "com.unity3d.subscription.new";
+        private static string kProductNameAppleSubscription = "spellingflea_sub_1m"; //com.unity3d.subscription.new
 
-        // Google Play Store-specific product identifier subscription product.
-        private static string kProductNameGooglePlaySubscription = "com.unity3d.subscription.original";
+    // Google Play Store-specific product identifier subscription product.   
+    private static string kProductNameGooglePlaySubscription = "spellingflea_sub_1m"; //com.unity3d.subscription.original
 
-        void Start()
+    void Start()
         {
             // If we haven't set up the Unity Purchasing reference
             if (m_StoreController == null)

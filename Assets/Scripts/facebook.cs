@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿/*
+using System.Collections.Generic;
 using UnityEngine;
 using Facebook.Unity;
 using UnityEngine.UI;
@@ -59,3 +60,4 @@ public class facebook : MonoBehaviour
     }
 
 }
+*/
